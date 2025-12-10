@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
 import { UserPlus, Phone, Briefcase, X, Search, Filter } from 'lucide-react'
-import axios from 'axios'
+import api from '../services/api'
+import { useToast } from '../context/ToastContext'
 
 export default function Employees() {
     const [employees, setEmployees] = useState([])
     const [showModal, setShowModal] = useState(false)
     const [formData, setFormData] = useState({ name: '', role: '', phone: '', daily_rate: '' })
+    const { showToast } = useToast()
 
     useEffect(() => {
-        axios.get('/api/employees')
+        api.get('/employees')
             .then(res => setEmployees(res.data))
             .catch(() => {
                 // Mock Data
@@ -17,18 +19,20 @@ export default function Employees() {
                     { id: 2, name: 'Mehmet Demir', role: 'Usta', phone: '0532 987 65 43', daily_rate: 1800 },
                     { id: 3, name: 'Ayşe Kaya', role: 'Mimar', phone: '0505 555 22 11', daily_rate: 3000 },
                 ])
+                // Silent fallback or use toast if preferred, keeping silent for list load
             })
     }, [])
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        axios.post('/api/employees', formData)
+        api.post('/employees', formData)
             .then(res => {
                 setEmployees([...employees, res.data])
                 setShowModal(false)
                 setFormData({ name: '', role: '', phone: '', daily_rate: '' })
+                showToast('Personel başarıyla eklendi.', 'success')
             })
-            .catch(err => alert("Hata: " + err.message))
+            .catch(err => showToast("Hata: " + err.message, 'error'))
     }
 
     return (

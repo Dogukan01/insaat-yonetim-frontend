@@ -1,29 +1,41 @@
 import { useState, useEffect } from 'react'
-import { Plus, MapPin, Calendar, X, Search, MoreHorizontal, ArrowRight, Edit2, Trash2 } from 'lucide-react'
-import axios from 'axios'
+import { Plus, MapPin, Calendar, X, Search, Edit2, Trash2, ArrowRight } from 'lucide-react'
+import api from '../services/api'
+import { useToast } from '../context/ToastContext'
+import Skeleton from '../components/ui/Skeleton'
 
 export default function Projects() {
     const [projects, setProjects] = useState([])
     const [showModal, setShowModal] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [editId, setEditId] = useState(null)
+    const [loading, setLoading] = useState(true)
     const [formData, setFormData] = useState({ name: '', location: '', budget: '', status: 'Planlama', start_date: '' })
+
+    const { showToast } = useToast()
 
     useEffect(() => {
         fetchProjects()
     }, [])
 
-    const fetchProjects = () => {
-        axios.get('/api/projects')
-            .then(res => setProjects(res.data))
-            .catch(err => {
-                console.error("API Hatası:", err)
-                setProjects([
-                    { id: 1, name: 'Vadi İstanbul Konutları', location: 'İstanbul, Sarıyer', budget: 5000000, status: 'Devam Ediyor', start_date: '2023-01-15' },
-                    { id: 2, name: 'Merkez AVM İnşaatı', location: 'Ankara, Çankaya', budget: 12000000, status: 'Planlama', start_date: '2024-05-01' },
-                    { id: 3, name: 'Sahil Rezidans', location: 'İzmir, Karşıyaka', budget: 8500000, status: 'Tamamlandı', start_date: '2022-09-10' },
-                ])
-            })
+    const fetchProjects = async () => {
+        setLoading(true)
+        try {
+            const res = await api.get('/projects');
+            setProjects(res.data)
+        } catch (err) {
+            console.error("API Hatası:", err)
+            // Fallback mock data
+            setProjects([
+                { id: 1, name: 'Vadi İstanbul Konutları', location: 'İstanbul, Sarıyer', budget: 5000000, status: 'Devam Ediyor', start_date: '2023-01-15' },
+                { id: 2, name: 'Merkez AVM İnşaatı', location: 'Ankara, Çankaya', budget: 12000000, status: 'Planlama', start_date: '2024-05-01' },
+                { id: 3, name: 'Sahil Rezidans', location: 'İzmir, Karşıyaka', budget: 8500000, status: 'Tamamlandı', start_date: '2022-09-10' },
+            ])
+            // Do not show error toast here to keep UI clean with fallback, 
+            // generally only show toast if user action fails.
+        } finally {
+            setLoading(false)
+        }
     }
 
     const resetForm = () => {
@@ -45,33 +57,48 @@ export default function Projects() {
         setShowModal(true)
     }
 
-    const handleSubmit = (e) => {
+    const validateForm = () => {
+        if (!formData.name.trim()) return "Proje adı zorunludur.";
+        if (!formData.start_date) return "Başlangıç tarihi zorunludur.";
+        if (formData.budget < 0) return "Bütçe negatif olamaz.";
+        return null;
+    }
+
+    const handleSubmit = async (e) => {
         e.preventDefault()
 
-        if (isEditing) {
-            axios.put(`/api/projects/${editId}`, formData)
-                .then(() => {
-                    fetchProjects()
-                    setShowModal(false)
-                    resetForm()
-                })
-                .catch(err => alert("Güncelleme başarısız: " + err.message))
-        } else {
-            axios.post('/api/projects', formData)
-                .then(() => {
-                    fetchProjects()
-                    setShowModal(false)
-                    resetForm()
-                })
-                .catch(err => alert("Kayıt başarısız: " + err.message))
+        const error = validateForm();
+        if (error) {
+            showToast(error, 'warning');
+            return;
+        }
+
+        try {
+            if (isEditing) {
+                await api.put(`/projects/${editId}`, formData)
+                showToast('Proje başarıyla güncellendi.', 'success')
+            } else {
+                await api.post('/projects', formData)
+                showToast('Yeni proje başarıyla oluşturuldu.', 'success')
+            }
+            fetchProjects()
+            setShowModal(false)
+            resetForm()
+        } catch (err) {
+            const msg = err.response?.data?.message || (isEditing ? "Güncelleme başarısız" : "Kayıt başarısız");
+            showToast(msg, 'error')
         }
     }
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (window.confirm('Bu projeyi silmek istediğinize emin misiniz?')) {
-            axios.delete(`/api/projects/${id}`)
-                .then(() => fetchProjects())
-                .catch(err => alert("Silme başarısız: " + err.message))
+            try {
+                await api.delete(`/projects/${id}`)
+                showToast('Proje silindi.', 'info')
+                fetchProjects()
+            } catch (err) {
+                showToast('Silme işlemi başarısız oldu.', 'error')
+            }
         }
     }
 
@@ -106,56 +133,77 @@ export default function Projects() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {projects.map((project) => (
-                    <div key={project.id} className="card group hover:shadow-2xl hover:shadow-primary-900/5 hover:-translate-y-1 transition-all duration-300 border-slate-200/60 relative overflow-hidden">
+                {loading ? (
+                    Array(3).fill(0).map((_, i) => (
+                        <div key={i} className="card h-64 flex flex-col justify-between">
+                            <div className="space-y-4">
+                                <div className="flex justify-between">
+                                    <Skeleton className="h-6 w-20 rounded-full" />
+                                    <Skeleton className="h-8 w-16" />
+                                </div>
+                                <Skeleton className="h-8 w-3/4" />
+                                <div className="space-y-2">
+                                    <Skeleton className="h-4 w-1/2" />
+                                    <Skeleton className="h-4 w-1/3" />
+                                </div>
+                            </div>
+                            <div className="pt-4 border-t border-slate-100 flex justify-between">
+                                <Skeleton className="h-10 w-24" />
+                                <Skeleton className="h-8 w-8 rounded-full" />
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    projects.map((project) => (
+                        <div key={project.id} className="card group hover:shadow-2xl hover:shadow-primary-900/5 hover:-translate-y-1 transition-all duration-300 border-slate-200/60 relative overflow-hidden">
+                            <div className="flex justify-between items-start mb-4">
+                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ring-1 inset-0 ${getStatusColor(project.status)}`}>
+                                    {project.status}
+                                </span>
 
-                        <div className="flex justify-between items-start mb-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ring-1 inset-0 ${getStatusColor(project.status)}`}>
-                                {project.status}
-                            </span>
+                                <div className="flex gap-1 opacity-100 transition-opacity">
+                                    <button
+                                        onClick={() => handleEditClick(project)}
+                                        className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-primary-600 transition-colors"
+                                    >
+                                        <Edit2 size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(project.id)}
+                                        className="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500 transition-colors"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
 
-                            <div className="flex gap-1 opacity-100 transition-opacity">
-                                <button
-                                    onClick={() => handleEditClick(project)}
-                                    className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-primary-600 transition-colors"
-                                >
-                                    <Edit2 size={16} />
+                            <h3 className="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary-600 transition-colors line-clamp-1" title={project.name}>
+                                {project.name}
+                            </h3>
+
+                            <div className="space-y-3 text-sm text-slate-500 mb-6 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <div className="flex items-center gap-2">
+                                    <MapPin size={16} className="text-slate-400" />
+                                    <span className="truncate">{project.location || 'Konum belirtilmedi'}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Calendar size={16} className="text-slate-400" />
+                                    <span>{project.start_date ? new Date(project.start_date).toLocaleDateString('tr-TR') : 'Tarih yok'}</span>
+                                </div>
+                            </div>
+
+                            <div className="pt-4 border-t border-slate-100 flex justify-between items-center mt-auto">
+                                <div>
+                                    <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">Bütçe</p>
+                                    <span className="font-bold text-slate-900 text-lg">₺{Number(project.budget).toLocaleString('tr-TR')}</span>
+                                </div>
+                                <button className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all">
+                                    <ArrowRight size={16} />
                                 </button>
-                                <button
-                                    onClick={() => handleDelete(project.id)}
-                                    className="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500 transition-colors"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
                             </div>
                         </div>
-
-                        <h3 className="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary-600 transition-colors line-clamp-1" title={project.name}>
-                            {project.name}
-                        </h3>
-
-                        <div className="space-y-3 text-sm text-slate-500 mb-6 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                            <div className="flex items-center gap-2">
-                                <MapPin size={16} className="text-slate-400" />
-                                <span className="truncate">{project.location || 'Konum belirtilmedi'}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Calendar size={16} className="text-slate-400" />
-                                <span>{project.start_date ? new Date(project.start_date).toLocaleDateString('tr-TR') : 'Tarih yok'}</span>
-                            </div>
-                        </div>
-
-                        <div className="pt-4 border-t border-slate-100 flex justify-between items-center mt-auto">
-                            <div>
-                                <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">Bütçe</p>
-                                <span className="font-bold text-slate-900 text-lg">₺{Number(project.budget).toLocaleString('tr-TR')}</span>
-                            </div>
-                            <button className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all">
-                                <ArrowRight size={16} />
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
 
             {/* Modal */}
@@ -187,7 +235,7 @@ export default function Projects() {
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Başlangıç Tarihi</label>
                                     <input type="date" className="input-field"
-                                        value={formData.start_date} onChange={e => setFormData({ ...formData, start_date: e.target.value })} />
+                                        value={formData.start_date} onChange={e => setFormData({ ...formData, start_date: e.target.value })} required />
                                 </div>
                             </div>
 

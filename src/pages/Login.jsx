@@ -1,18 +1,44 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { HardHat, User, Lock, ArrowRight } from 'lucide-react'
+import { HardHat, User, Lock, ArrowRight, Loader2 } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 
-export default function Login({ onLogin }) {
+export default function Login() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+
+    const { login } = useAuth()
+    const { showToast } = useToast()
     const navigate = useNavigate()
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        // Mock authentication
-        if (email && password) {
-            onLogin()
-            navigate('/')
+
+        // Basic Validation
+        if (!email || !password) {
+            showToast('Lütfen tüm alanları doldurun.', 'warning')
+            return
+        }
+
+        setIsLoading(true)
+
+        try {
+            const result = await login(email, password)
+            if (result.success) {
+                showToast('Giriş başarılı! Yönlendiriliyorsunuz...', 'success')
+                // Navigation is handled by App.jsx wrapper watching auth state, 
+                // but we can force it or let the state change trigger it.
+                // Added distinct navigation for better UX if needed.
+                navigate('/')
+            } else {
+                showToast(result.message || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.', 'error')
+            }
+        } catch (error) {
+            showToast('Bir hata oluştu. Lütfen tekrar deneyin.', 'error')
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -61,7 +87,7 @@ export default function Login({ onLogin }) {
                                     className="input-field pl-12"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    required
+                                    disabled={isLoading}
                                 />
                             </div>
                         </div>
@@ -76,7 +102,7 @@ export default function Login({ onLogin }) {
                                     className="input-field pl-12"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    required
+                                    disabled={isLoading}
                                 />
                             </div>
                         </div>
@@ -89,8 +115,21 @@ export default function Login({ onLogin }) {
                             <a href="#" className="text-primary-600 hover:text-primary-700 font-medium">Şifremi unuttum?</a>
                         </div>
 
-                        <button type="submit" className="w-full btn-primary py-3.5 text-base group">
-                            Giriş Yap <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full btn-primary py-3.5 text-base group disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="animate-spin" size={20} />
+                                    Giriş Yapılıyor...
+                                </>
+                            ) : (
+                                <>
+                                    Giriş Yap <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
                         </button>
                     </form>
 

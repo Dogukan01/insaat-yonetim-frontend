@@ -1,37 +1,54 @@
-import { useState } from 'react'
-import { Building, Users, DollarSign, Activity, TrendingUp, Bell, Check, AlertCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Building, Users, DollarSign, Activity, TrendingUp, Bell } from 'lucide-react'
+import Skeleton from '../components/ui/Skeleton'
+import api from '../services/api'
+import { useToast } from '../context/ToastContext'
 
 export default function Dashboard() {
     const [showNotifications, setShowNotifications] = useState(false)
-    const [showReportToast, setShowReportToast] = useState(false)
+    const [stats, setStats] = useState([])
+    const [loading, setLoading] = useState(true)
+    const { showToast } = useToast()
 
-    const stats = [
-        { label: 'Aktif Projeler', value: '12', icon: Building, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-        { label: 'Toplam Personel', value: '48', icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
-        { label: 'Aylık Bütçe', value: '₺850K', icon: DollarSign, color: 'text-violet-600', bg: 'bg-violet-50', border: 'border-violet-100' },
-        { label: 'Tamamlanma', value: '%64', icon: Activity, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
-    ]
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                // Mock API call simulation if real endpoint fails
+                // In production, removing the setTimeout and just using api.get
+                // is cleaner, but keeping fallback logic for demo.
+
+                // const response = await api.get('/stats');
+                // setStats(response.data);
+
+                // Simulation for demonstration
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                setStats([
+                    { label: 'Aktif Projeler', value: '12', icon: Building, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
+                    { label: 'Toplam Personel', value: '48', icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+                    { label: 'Aylık Bütçe', value: '₺850K', icon: DollarSign, color: 'text-violet-600', bg: 'bg-violet-50', border: 'border-violet-100' },
+                    { label: 'Tamamlanma', value: '%64', icon: Activity, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
+                ])
+            } catch (error) {
+                console.error("Stats fetching failed", error);
+                showToast("İstatistikler yüklenemedi", "error");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchStats()
+    }, [showToast])
 
     const handleDownloadReport = () => {
-        setShowReportToast(true)
-        setTimeout(() => setShowReportToast(false), 3000)
+        showToast('Rapor hazırlanıyor, indirme birazdan başlayacak.', 'info')
+        setTimeout(() => {
+            showToast('Rapor başarıyla indirildi.', 'success')
+        }, 2000)
     }
 
     return (
         <div className="space-y-8 relative">
-            {/* Toast Notification */}
-            {showReportToast && (
-                <div className="fixed top-24 right-8 bg-slate-900 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-slide-in z-50">
-                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                        <Check size={18} />
-                    </div>
-                    <div>
-                        <h4 className="font-bold text-sm">Rapor Hazırlandı</h4>
-                        <p className="text-xs text-slate-400">PDF dosyası indiriliyor...</p>
-                    </div>
-                </div>
-            )}
-
             <div className="flex flex-col md:flex-row justify-between items-end gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Kontrol Paneli</h1>
@@ -83,19 +100,33 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, index) => (
-                    <div key={index} className={`card border-l-4 ${stat.border} hover:scale-105 transition-transform duration-300`}>
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">{stat.label}</p>
-                                <h3 className="text-2xl font-bold text-slate-800">{stat.value}</h3>
-                            </div>
-                            <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
-                                <stat.icon size={24} />
+                {loading ? (
+                    Array(4).fill(0).map((_, i) => (
+                        <div key={i} className="card border-l-4 border-slate-200">
+                            <div className="flex justify-between items-start">
+                                <div className="space-y-2">
+                                    <Skeleton className="h-4 w-24" />
+                                    <Skeleton className="h-8 w-16" />
+                                </div>
+                                <Skeleton className="h-12 w-12 rounded-xl" />
                             </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                ) : (
+                    stats.map((stat, index) => (
+                        <div key={index} className={`card border-l-4 ${stat.border} hover:scale-105 transition-transform duration-300`}>
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">{stat.label}</p>
+                                    <h3 className="text-2xl font-bold text-slate-800">{stat.value}</h3>
+                                </div>
+                                <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
+                                    <stat.icon size={24} />
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
