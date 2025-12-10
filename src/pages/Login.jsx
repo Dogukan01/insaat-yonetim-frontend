@@ -1,0 +1,104 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { HardHat, User, Lock, ArrowRight } from 'lucide-react'
+
+export default function Login({ onLogin }) {
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const navigate = useNavigate()
+
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        // Mock authentication
+        if (email && password) {
+            onLogin()
+            navigate('/')
+        }
+    }
+
+    return (
+        <div className="min-h-screen grid lg:grid-cols-2 bg-white">
+            {/* Left Side - Visual */}
+            <div className="hidden lg:flex flex-col justify-between bg-dark-950 p-12 relative overflow-hidden text-white">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-900/40 to-dark-950 z-0" />
+                <div className="absolute top-0 right-0 w-96 h-96 bg-primary-600/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+
+                <div className="relative z-10">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30">
+                            <HardHat className="text-white" size={24} />
+                        </div>
+                        <h1 className="text-2xl font-bold tracking-tight">İnşaat<span className="text-primary-400">Yön</span></h1>
+                    </div>
+                </div>
+
+                <div className="relative z-10 max-w-lg">
+                    <h2 className="text-4xl font-bold mb-6 leading-tight">Şantiyenizi Profesyonelce Yönetin</h2>
+                    <p className="text-slate-400 text-lg leading-relaxed">Projelerinizi, ekiplerinizi ve bütçenizi tek bir yerden kontrol edin. Modern yapı yönetim sistemi.</p>
+                </div>
+
+                <div className="relative z-10 text-sm text-slate-500">
+                    © 2024 İnşaatYön. Tüm hakları saklıdır.
+                </div>
+            </div>
+
+            {/* Right Side - Form */}
+            <div className="flex items-center justify-center p-8 bg-slate-50">
+                <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
+                    <div className="mb-8 text-center">
+                        <h2 className="text-2xl font-bold text-slate-900">Hoş Geldiniz</h2>
+                        <p className="text-slate-500 mt-2">Hesabınıza giriş yapın</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-medium text-slate-700 ml-1">E-posta Adresi</label>
+                            <div className="relative">
+                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                                <input
+                                    type="email"
+                                    placeholder="ornek@sirket.com"
+                                    className="input-field pl-12"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-medium text-slate-700 ml-1">Şifre</label>
+                            <div className="relative">
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                                <input
+                                    type="password"
+                                    placeholder="••••••••"
+                                    className="input-field pl-12"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500" />
+                                <span className="text-slate-600">Beni hatırla</span>
+                            </label>
+                            <a href="#" className="text-primary-600 hover:text-primary-700 font-medium">Şifremi unuttum?</a>
+                        </div>
+
+                        <button type="submit" className="w-full btn-primary py-3.5 text-base group">
+                            Giriş Yap <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </form>
+
+                    <p className="mt-8 text-center text-sm text-slate-500">
+                        Hesabınız yok mu? <a href="#" className="text-primary-600 hover:text-primary-700 font-bold">Kayıt Olun</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    )
+}
