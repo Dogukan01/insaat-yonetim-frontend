@@ -7,11 +7,11 @@ import Skeleton from '../components/ui/Skeleton'
 export default function Employees() {
     const [employees, setEmployees] = useState([])
     const [projects, setProjects] = useState([])
-    const [roles, setRoles] = useState([]) // YENİ: Rolleri tutacak state
+    const [roles, setRoles] = useState([])
     
     const [showModal, setShowModal] = useState(false)
-    const [showRoleInput, setShowRoleInput] = useState(false) // Yeni rol ekleme kutusunu aç/kapa
-    const [newRoleName, setNewRoleName] = useState('') // Yeni rol ismi
+    const [showRoleInput, setShowRoleInput] = useState(false)
+    const [newRoleName, setNewRoleName] = useState('')
     
     const [isLoading, setIsLoading] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)

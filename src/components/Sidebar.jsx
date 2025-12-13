@@ -1,10 +1,9 @@
 import { Home, HardHat, Building2, Users, Settings, LogOut, ChevronRight } from 'lucide-react'
-import { NavLink, useNavigate } from 'react-router-dom' // useNavigate eklendi
-import { useAuth } from '../context/AuthContext' // AuthContext eklendi
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
-// Props kısmından { onLogout } ifadesini kaldırdık
 export default function Sidebar() {
-    const { logout } = useAuth() // Context'ten logout fonksiyonunu çektik
+    const { logout } = useAuth()
     const navigate = useNavigate()
 
     const navItems = [
@@ -14,7 +13,7 @@ export default function Sidebar() {
     ]
 
     const handleLogout = () => {
-        logout() // Token'ı siler ve state'i sıfırlar
+        logout() // Token'ı siler ve statei sıfırlar
         navigate('/login') // Giriş sayfasına atar
     }
 
@@ -62,7 +61,6 @@ export default function Sidebar() {
             </nav>
 
             <div className="p-4 border-t border-slate-800/50 relative z-10">
-                {/* onClick olayını handleLogout'a bağladık */}
                 <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3.5 w-full text-slate-400 hover:text-red-400 hover:bg-red-950/20 rounded-xl transition-all duration-300 group">
                     <LogOut size={20} className="group-hover:rotate-12 transition-transform" />
                     <span className="font-medium">Oturumu Kapat</span>

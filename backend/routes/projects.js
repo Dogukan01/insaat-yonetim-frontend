@@ -4,7 +4,6 @@ const Project = require('../models/Project');
 const Activity = require('../models/Activity');
 const auth = require('../middleware/auth');
 
-// 1. GET - Projeleri Getir
 router.get('/', auth, async (req, res) => {
     try {
         const projects = await Project.findAll({
@@ -17,7 +16,6 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
-// 2. POST - Yeni Proje (Detaylı Log)
 router.post('/', auth, async (req, res) => {
     try {
         const newProject = await Project.create({
@@ -38,7 +36,6 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// 3. PUT - Proje Güncelleme (DETAYLI DEĞİŞİKLİK LOGU)
 router.put('/:id', auth, async (req, res) => {
     try {
         // Önce eski halini buluyoruz
@@ -86,7 +83,6 @@ router.put('/:id', auth, async (req, res) => {
     }
 });
 
-// 4. DELETE - Proje Silme (Loglu)
 router.delete('/:id', auth, async (req, res) => {
     try {
         const project = await Project.findOne({ 

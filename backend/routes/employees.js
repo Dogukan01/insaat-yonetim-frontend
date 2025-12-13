@@ -6,7 +6,6 @@ const Role = require('../models/Role');
 const Activity = require('../models/Activity');
 const auth = require('../middleware/auth');
 
-// 1. GET
 router.get('/', auth, async (req, res) => {
     try {
         const employees = await Employee.findAll({
@@ -24,7 +23,6 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
-// 2. POST - Yeni Çalışan (Loglu)
 router.post('/', auth, async (req, res) => {
     try {
         const newEmployee = await Employee.create({
@@ -44,7 +42,6 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// 3. PUT - Çalışan Güncelleme (DETAYLI DEĞİŞİKLİK LOGU)
 router.put('/:id', auth, async (req, res) => {
     try {
         const employee = await Employee.findOne({ 
@@ -65,8 +62,7 @@ router.put('/:id', auth, async (req, res) => {
         if (newData.daily_rate && parseFloat(newData.daily_rate) !== employee.daily_rate) {
             changes.push(`Ücret: ₺${employee.daily_rate} -> ₺${newData.daily_rate}`);
         }
-        // Rol ve Proje değişimlerini ID üzerinden kontrol ediyoruz
-        // (Eğer ID değiştiyse 'Rol Değişti' yazıyoruz, veritabanı yormamak için isim çekmiyoruz)
+
         if (newData.RoleId && parseInt(newData.RoleId) !== employee.RoleId) {
             changes.push(`Görev (Rol) değiştirildi`);
         }
@@ -95,7 +91,6 @@ router.put('/:id', auth, async (req, res) => {
     }
 });
 
-// 4. DELETE - Silme (Loglu)
 router.delete('/:id', auth, async (req, res) => {
     try {
         const employee = await Employee.findOne({ 

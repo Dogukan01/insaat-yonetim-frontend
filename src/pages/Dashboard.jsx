@@ -40,7 +40,7 @@ export default function Dashboard() {
     }, [showToast])
 
     const handleDownloadReport = () => {
-        // ... (Rapor indirme kodu aynı kalsın) ...
+        // ekleme yapılacak
     }
     
     // Rengi belirleyen yardımcı fonksiyon
@@ -108,7 +108,6 @@ export default function Dashboard() {
 
             {/* KARTLAR */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* ... (Kartlar aynı kalsın) ... */}
                  {loading ? (
                     Array(4).fill(0).map((_, i) => (
                         <div key={i} className="card border-l-4 border-slate-200">

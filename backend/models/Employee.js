@@ -1,16 +1,12 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 const Project = require('./Project');
-const Role = require('./Role'); // <--- YENİ: Role modelini çağır
+const Role = require('./Role');
 
 const Employee = sequelize.define('Employee', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, allowNull: false },
-    
-    // --- DEĞİŞİKLİK BURADA ---
-    // role: { type: DataTypes.STRING ... }  <-- ESKİSİNİ SİLDİK
-    
-    // YENİSİ: Rol tablosuna referans
+
     RoleId: {
         type: DataTypes.INTEGER,
         allowNull: true, // Geçici olarak null olabilir
@@ -19,7 +15,6 @@ const Employee = sequelize.define('Employee', {
             key: 'id'
         }
     },
-    // -------------------------
 
     ProjectId: {
         type: DataTypes.INTEGER,

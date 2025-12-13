@@ -3,10 +3,10 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const { connectDB, sequelize } = require('./config/db');
 
-// Model Importları (İlişki kurmak için gerekli)
+// Model Importları
 const Project = require('./models/Project');
 const Employee = require('./models/Employee');
-const Role = require('./models/Role'); // <--- YENİ: Role modelini dahil ettik
+const Role = require('./models/Role')
 const Activity = require('./models/Activity');
 const { Flashlight } = require('lucide-react');
 
@@ -18,19 +18,13 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// --- İLİŞKİ TANIMLARI (ASSOCIATIONS) ---
-
-// 1. Proje - Çalışan İlişkisi
-// Bir projenin çok çalışanı olabilir, proje silinirse çalışanın proje bilgisi boş (NULL) olsun.
+// İLİŞKİ TANIMLARI (ASSOCIATIONS)
 Project.hasMany(Employee, { foreignKey: 'ProjectId', onDelete: 'SET NULL' });
 Employee.belongsTo(Project, { foreignKey: 'ProjectId' });
 
-// 2. Rol - Çalışan İlişkisi (YENİ)
-// Bir rolün (örn: Usta) çok çalışanı olabilir.
 Role.hasMany(Employee, { foreignKey: 'RoleId' });
 Employee.belongsTo(Role, { foreignKey: 'RoleId' });
 
-// ---------------------------------------
 
 // Rotalar
 app.use('/api/auth', require('./routes/auth'));
