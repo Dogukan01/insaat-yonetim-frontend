@@ -36,10 +36,7 @@ export default function Layout() {
 
             <main className="flex-1 flex flex-col relative min-w-0">
                 {/* Modern Header */}
-                <header className={`
-                    px-8 py-5 flex justify-between items-center transition-all duration-300 z-40
-                    ${scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200/60' : 'bg-transparent'}
-                `}>
+                <header className={`px-8 py-5 flex justify-between items-center transition-all duration-300 z-40 ${scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200/60' : 'bg-transparent'}`}>
                     {/* Sol: Hoşgeldin Mesajı ve Tarih */}
                     <div className="flex flex-col">
                         <h1 className="text-base font-semibold public-sans text-slate-700 tracking-tight">
@@ -74,7 +71,7 @@ export default function Layout() {
 
                         {/* Profil Kartı */}
                         <div className="flex items-center gap-3 pl-2 cursor-pointer group">
-                            <div className="flex flex-col items-end hidden md:block">
+                            <div className="hidden md:flex flex-col items-end">
                                 <span className="text-sm font-bold text-slate-800 group-hover:text-primary-700 transition-colors">
                                     {user?.name || 'Yönetici'}
                                 </span>
