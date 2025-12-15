@@ -3,8 +3,8 @@ const router = express.Router();
 const Employee = require('../models/Employee');
 const Project = require('../models/Project');
 const Role = require('../models/Role');
-const Activity = require('../models/Activity');
 const auth = require('../middleware/auth');
+const AuditLogger = require('../utils/auditLogger');
 
 router.get('/', auth, async (req, res) => {
     try {
@@ -30,11 +30,8 @@ router.post('/', auth, async (req, res) => {
             userId: req.user.id
         });
 
-        await Activity.create({
-            content: `Yeni personel eklendi: ${newEmployee.name}`,
-            type: 'success',
-            userId: req.user.id
-        });
+        // Audit Log
+        await AuditLogger.logEmployee('CREATE', req.user.id, req.user.name || 'Admin', newEmployee, req);
 
         res.json(newEmployee);
     } catch (err) {
@@ -75,15 +72,6 @@ router.put('/:id', auth, async (req, res) => {
 
         await employee.update(newData);
 
-        // Değişiklik varsa kaydet
-        if (changes.length > 0) {
-            await Activity.create({
-                content: `Personel güncellendi (${employee.name}): ${changes.join(', ')}`,
-                type: 'warning',
-                userId: req.user.id
-            });
-        }
-
         res.json(employee);
 
     } catch (err) {
@@ -98,14 +86,7 @@ router.delete('/:id', auth, async (req, res) => {
         });
 
         if (employee) {
-            const tempName = employee.name;
             await employee.destroy();
-
-            await Activity.create({
-                content: `Personel kaydı silindi: ${tempName}`,
-                type: 'danger',
-                userId: req.user.id
-            });
 
             res.json({ message: 'Çalışan silindi' });
         } else {

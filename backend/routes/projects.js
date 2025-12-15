@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Project = require('../models/Project');
-const Activity = require('../models/Activity');
 const auth = require('../middleware/auth');
+const AuditLogger = require('../utils/auditLogger');
 
 router.get('/', auth, async (req, res) => {
     try {
@@ -23,12 +23,8 @@ router.post('/', auth, async (req, res) => {
             userId: req.user.id
         });
 
-        // LOG: Proje oluşturuldu
-        await Activity.create({
-            content: `Yeni proje başlatıldı: "${newProject.name}" (Bütçe: ₺${newProject.budget})`,
-            type: 'success',
-            userId: req.user.id
-        });
+        // Audit Log
+        await AuditLogger.logProject('CREATE', req.user.id, req.user.name || 'Admin', newProject, req);
 
         res.json(newProject);
     } catch (err) {
@@ -67,15 +63,6 @@ router.put('/:id', auth, async (req, res) => {
         // Güncellemeyi yap
         await project.update(newData);
 
-        // Eğer bir değişiklik varsa LOG at
-        if (changes.length > 0) {
-            await Activity.create({
-                content: `Proje güncellendi (${project.name}): ${changes.join(', ')}`,
-                type: 'warning', // Turuncu renk
-                userId: req.user.id
-            });
-        }
-
         res.json(project);
 
     } catch (err) {
@@ -90,15 +77,7 @@ router.delete('/:id', auth, async (req, res) => {
         });
 
         if (project) {
-            const tempName = project.name; // Silmeden ismini al
             await project.destroy();
-
-            // LOG
-            await Activity.create({
-                content: `Proje ve verileri silindi: ${tempName}`,
-                type: 'danger',
-                userId: req.user.id
-            });
 
             res.json({ message: 'Proje silindi' });
         } else {

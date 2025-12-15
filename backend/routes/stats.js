@@ -3,7 +3,7 @@ const router = express.Router();
 const Project = require('../models/Project');
 const Employee = require('../models/Employee');
 const auth = require('../middleware/auth');
-const Activity = require('../models/Activity');
+const AuditLog = require('../models/AuditLog');
 
 router.get('/', auth, async (req, res) => {
     // userId filtresini kaldırdık ki dashboard herkes için dolsun.
@@ -24,10 +24,11 @@ router.get('/', auth, async (req, res) => {
             Project.count({ where: { status: 'Tamamlandı' } }),
             Project.count({}),
 
-            // Son 5 hareketi çek (Herkesin aktiviteleri)
-            Activity.findAll({
+            // Son 5 aktiviteyi AuditLog'dan çek
+            AuditLog.findAll({
                 limit: 5,
-                order: [['createdAt', 'DESC']]
+                order: [['createdAt', 'DESC']],
+                attributes: ['id', 'userName', 'action', 'entity', 'description', 'createdAt']
             })
         ]);
 

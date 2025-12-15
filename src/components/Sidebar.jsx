@@ -1,4 +1,4 @@
-import { Home, HardHat, Building2, Users, Briefcase, Calendar, DollarSign, FileText, Settings, LogOut, ChevronRight, ClipboardList, FolderOpen, Package, ListTodo } from 'lucide-react'
+import { Home, Building2, Users, Briefcase, Calendar, DollarSign, FileText, Settings, LogOut, ChevronRight, Package } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -9,11 +9,11 @@ export default function Sidebar() {
     const navItems = [
         { name: 'Genel Bakış', icon: Home, path: '/' },
         { name: 'Projeler', icon: Building2, path: '/projects' },
-        { name: 'Çalışan Ekibi', icon: Users, path: '/employees' },
-        { name: 'Roller', icon: Briefcase, path: '/roles' },
+        { name: 'Ekip Yönetimi', icon: Users, path: '/team' },
         { name: 'Yoklama', icon: Calendar, path: '/attendance' },
         { name: 'Harcamalar', icon: DollarSign, path: '/expenses' },
-        { name: 'SQL Raporları', icon: FileText, path: '/reports' },
+        { name: 'Envanter', icon: Package, path: '/inventory' },
+        { name: 'Raporlar', icon: FileText, path: '/reports' },
         { name: 'Ayarlar', icon: Settings, path: '/settings' },
     ]
 
@@ -39,7 +39,7 @@ export default function Sidebar() {
                 <p className="text-slate-500 text-xs pl-[3.25rem]">Profesyonel Yönetim</p>
             </div>
 
-            <nav className="flex-1 px-4 py-2 space-y-2 relative z-10">
+            <nav className="flex-1 px-4 py-2 space-y-2 relative z-10 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
                 <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Menü</p>
                 {navItems.map((item) => (
                     <NavLink

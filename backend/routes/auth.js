@@ -3,9 +3,8 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const Setting = require('../models/Setting');
-const SecurityLog = require('../models/SecurityLog');
 const auth = require('../middleware/auth');
+const AuditLogger = require('../utils/auditLogger');
 
 router.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
@@ -13,14 +12,6 @@ router.post('/register', async (req, res) => {
     try {
         if (!name || !email || !password) {
             return res.status(400).json({ message: 'Lütfen tüm alanları doldurun.' });
-        }
-
-        // Kayıt olma ayarını kontrol et
-        const setting = await Setting.findOne({ where: { key: 'registration_enabled' } });
-        // Eğer ayar varsa ve 'false' ise, kayıt işlemini engelle
-        // Not: String olarak saklandığı için 'false' kontrolü yapıyoruz.
-        if (setting && setting.value === 'false') {
-            return res.status(403).json({ message: 'Yeni üye kaydı yönetici tarafından kapatılmıştır.' });
         }
 
         // E-posta kontrolü
@@ -41,6 +32,9 @@ router.post('/register', async (req, res) => {
             role: 'admin',
             isVerified: true // Direkt onaylı
         });
+
+        // Audit Log
+        await AuditLogger.logAuth('REGISTER', user.id, user.name, req);
 
         res.json({ success: true, message: 'Kayıt başarılı! Giriş yapabilirsiniz.' });
 
@@ -68,20 +62,8 @@ router.post('/login', async (req, res) => {
 
         const payload = { user: { id: user.id, role: user.role } };
 
-        // Güvenlik Logu Kaydet
-        try {
-            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-            await SecurityLog.create({
-                userId: user.id,
-                userName: user.name,
-                action: 'Giriş Başarılı',
-                ipAddress: ip,
-                details: `${user.role === 'admin' ? 'Yönetici' : 'Kullanıcı'} girişi yapıldı.`
-            });
-        } catch (logError) {
-            console.error("Güvenlik logu oluşturulamadı:", logError);
-            // Log hatası login işlemini durdurmamalı
-        }
+        // Audit Log
+        await AuditLogger.logAuth('LOGIN', user.id, user.name, req);
 
         jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5h' }, (err, token) => {
             if (err) throw err;

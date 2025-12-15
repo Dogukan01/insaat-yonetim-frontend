@@ -6,7 +6,6 @@ const User = require('./User');
 const Project = require('./Project');
 const Employee = require('./Employee');
 const Role = require('./Role');
-const Activity = require('./Activity');
 const Attendance = require('./Attendance');
 const Supplier = require('./Supplier');
 const Material = require('./Material');
@@ -15,8 +14,7 @@ const ProjectMaterial = require('./ProjectMaterial');
 const ProjectEquipment = require('./ProjectEquipment');
 const Expense = require('./Expense');
 const Document = require('./Document');
-const Setting = require('./Setting');
-const SecurityLog = require('./SecurityLog');
+const AuditLog = require('./AuditLog');
 
 // ==================== İLİŞKİ TANIMLARI ====================
 
@@ -55,25 +53,25 @@ Supplier.hasMany(Material, { foreignKey: 'SupplierId', onDelete: 'SET NULL' });
 Material.belongsTo(Supplier, { foreignKey: 'SupplierId' });
 
 // Many-to-Many: Projects <-> Materials (through ProjectMaterial)
-Project.belongsToMany(Material, {
-    through: ProjectMaterial,
+Project.belongsToMany(Material, { 
+    through: ProjectMaterial, 
     foreignKey: 'ProjectId',
     otherKey: 'MaterialId'
 });
-Material.belongsToMany(Project, {
-    through: ProjectMaterial,
+Material.belongsToMany(Project, { 
+    through: ProjectMaterial, 
     foreignKey: 'MaterialId',
     otherKey: 'ProjectId'
 });
 
 // Many-to-Many: Projects <-> Equipment (through ProjectEquipment)
-Project.belongsToMany(Equipment, {
-    through: ProjectEquipment,
+Project.belongsToMany(Equipment, { 
+    through: ProjectEquipment, 
     foreignKey: 'ProjectId',
     otherKey: 'EquipmentId'
 });
-Equipment.belongsToMany(Project, {
-    through: ProjectEquipment,
+Equipment.belongsToMany(Project, { 
+    through: ProjectEquipment, 
     foreignKey: 'EquipmentId',
     otherKey: 'ProjectId'
 });
@@ -82,6 +80,10 @@ Equipment.belongsToMany(Project, {
 User.hasMany(Document, { foreignKey: 'uploaded_by', onDelete: 'SET NULL' });
 Document.belongsTo(User, { as: 'uploader', foreignKey: 'uploaded_by' });
 
+// AuditLog - User ilişkisi
+User.hasMany(AuditLog, { foreignKey: 'userId', onDelete: 'SET NULL' });
+AuditLog.belongsTo(User, { foreignKey: 'userId' });
+
 // Export edilecek tüm modeller
 module.exports = {
     sequelize,
@@ -89,7 +91,6 @@ module.exports = {
     Project,
     Employee,
     Role,
-    Activity,
     Attendance,
     Supplier,
     Material,
@@ -98,6 +99,5 @@ module.exports = {
     ProjectEquipment,
     Expense,
     Document,
-    Setting,
-    SecurityLog
+    AuditLog
 };

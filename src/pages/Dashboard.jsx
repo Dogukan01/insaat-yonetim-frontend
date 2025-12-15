@@ -140,7 +140,7 @@ export default function Dashboard() {
             color: 'text-emerald-600',
             bg: 'bg-emerald-50',
             border: 'border-emerald-200',
-            onClick: () => navigate('/employees')
+            onClick: () => navigate('/team')
         },
         {
             label: 'Toplam Harcama',
@@ -150,7 +150,7 @@ export default function Dashboard() {
             color: 'text-violet-600',
             bg: 'bg-violet-50',
             border: 'border-violet-200',
-            onClick: () => setShowExpenseModal(true)
+            onClick: () => navigate('/expenses')
         },
         {
             label: 'Roller',
@@ -160,7 +160,7 @@ export default function Dashboard() {
             color: 'text-amber-600',
             bg: 'bg-amber-50',
             border: 'border-amber-200',
-            onClick: () => navigate('/roles')
+            onClick: () => navigate('/team')
         }
     ]
 

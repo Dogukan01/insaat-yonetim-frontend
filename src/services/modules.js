@@ -1,39 +1,5 @@
 import api from './api';
 
-export const siteDiaryService = {
-    getAll: async (filters) => {
-        const response = await api.get('/site-diary', { params: filters });
-        return response.data;
-    },
-    create: async (data) => {
-        const response = await api.post('/site-diary', data);
-        return response.data;
-    },
-    delete: async (id) => {
-        const response = await api.delete(`/site-diary/${id}`);
-        return response.data;
-    }
-};
-
-export const taskService = {
-    getAll: async (projectId) => {
-        const response = await api.get('/tasks', { params: { projectId } });
-        return response.data;
-    },
-    create: async (data) => {
-        const response = await api.post('/tasks', data);
-        return response.data;
-    },
-    update: async (id, data) => {
-        const response = await api.put(`/tasks/${id}`, data);
-        return response.data;
-    },
-    delete: async (id) => {
-        const response = await api.delete(`/tasks/${id}`);
-        return response.data;
-    }
-};
-
 export const docService = {
     getAll: async (projectId) => {
         const response = await api.get('/documents', { params: { projectId } });
@@ -64,6 +30,52 @@ export const materialService = {
     },
     addTransaction: async (id, data) => {
         const response = await api.post(`/materials/${id}/transactions`, data);
+        return response.data;
+    }
+};
+
+export const equipmentService = {
+    getAll: async () => {
+        const response = await api.get('/equipment');
+        return response.data;
+    },
+    create: async (data) => {
+        const response = await api.post('/equipment', data);
+        return response.data;
+    },
+    update: async (id, data) => {
+        const response = await api.put(`/equipment/${id}`, data);
+        return response.data;
+    },
+    delete: async (id) => {
+        const response = await api.delete(`/equipment/${id}`);
+        return response.data;
+    },
+    getProjects: async (id) => {
+        const response = await api.get(`/equipment/${id}/projects`);
+        return response.data;
+    },
+    assignToProject: async (id, data) => {
+        const response = await api.post(`/equipment/${id}/assign`, data);
+        return response.data;
+    }
+};
+
+export const supplierService = {
+    getAll: async () => {
+        const response = await api.get('/suppliers');
+        return response.data;
+    },
+    create: async (data) => {
+        const response = await api.post('/suppliers', data);
+        return response.data;
+    },
+    update: async (id, data) => {
+        const response = await api.put(`/suppliers/${id}`, data);
+        return response.data;
+    },
+    delete: async (id) => {
+        const response = await api.delete(`/suppliers/${id}`);
         return response.data;
     }
 };
